@@ -104,6 +104,12 @@ dev_dependencies:
     sdk: flutter
   msix: ^3.6.2
   translations_cleaner: ^0.0.5
+  flutter_launcher_icons: "^0.13.1"
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.png"
+
 
 flutter_native_splash:
   color: "#ffffff"

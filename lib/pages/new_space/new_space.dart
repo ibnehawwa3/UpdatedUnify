@@ -34,7 +34,8 @@ class NewSpaceController extends State<NewSpace> {
         roomAliasName: publicGroup && controller.text.isNotEmpty
             ? controller.text.trim().toLowerCase().replaceAll(' ', '_')
             : null,
-        name: controller.text.isNotEmpty ? controller.text : null,
+        // name: controller.text.isNotEmpty ? controller.text : null,
+        name: controller.text.isNotEmpty ? "Physics1" : null,
       ),
     );
     if (roomID.error == null) {

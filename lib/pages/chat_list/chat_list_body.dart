@@ -280,6 +280,7 @@ class ChatListViewBody extends StatelessWidget {
                             )) {
                           return const SizedBox.shrink();
                         }
+                        /// For bottom nav Chat list
                         return ChatListItem(
                           rooms[i],
                           key: Key('chat_list_item_${rooms[i].id}'),

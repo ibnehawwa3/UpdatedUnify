@@ -36,18 +36,18 @@ class NewSpaceView extends StatelessWidget {
               ),
             ),
             // yasir
-            // SwitchListTile.adaptive(
-            //   title: Text(L10n.of(context)!.spaceIsPublic),
-            //   value: controller.publicGroup,
-            //   onChanged: controller.setPublicGroup,
-            // ),
-            // ListTile(
-            //   trailing: const Padding(
-            //     padding: EdgeInsets.symmetric(horizontal: 16.0),
-            //     child: Icon(Icons.info_outlined),
-            //   ),
-            //   subtitle: Text(L10n.of(context)!.newSpaceDescription),
-            // ),
+            SwitchListTile.adaptive(
+              title: Text(L10n.of(context)!.spaceIsPublic),
+              value: controller.publicGroup,
+              onChanged: controller.setPublicGroup,
+            ),
+            ListTile(
+              trailing: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Icon(Icons.info_outlined),
+              ),
+              subtitle: Text(L10n.of(context)!.newSpaceDescription),
+            ),
           ],
         ),
       ),

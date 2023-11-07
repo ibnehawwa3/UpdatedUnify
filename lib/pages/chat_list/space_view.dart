@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat_list/study_space_view.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -168,24 +169,47 @@ class _SpaceViewState extends State<SpaceView> {
                 );
                 return Material(
                   color: Theme.of(context).colorScheme.background,
-                  child: ListTile(
-                    leading: Avatar(
-                      mxContent: rootSpace.avatar,
-                      name: displayname,
-                    ),
-                    title: Text(
-                      displayname,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Text(
-                      L10n.of(context)!
-                          .numChats(rootSpace.spaceChildren.length.toString()),
-                    ),
-                    onTap: () => widget.controller.setActiveSpace(rootSpace.id),
-                    onLongPress: () =>
-                        _onSpaceChildContextMenu(null, rootSpace),
-                    trailing: const Icon(Icons.chevron_right_outlined),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Avatar(
+                          name: "SS",
+                        ),
+                        title: const Text(
+                          "Study",
+                        ),
+                        subtitle: const Text(
+                          "Study Space",
+                        ),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const StudyViewSpace(),
+                            ),
+                          );
+                        },
+                        trailing: const Icon(Icons.chevron_right_outlined),
+                      ),
+                      ListTile(
+                        leading: Avatar(
+                          mxContent: rootSpace.avatar,
+                          name: displayname,
+                        ),
+                        title: Text(
+                          displayname,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          L10n.of(context)!
+                              .numChats(rootSpace.spaceChildren.length.toString()),
+                        ),
+                        onTap: () => widget.controller.setActiveSpace(rootSpace.id),
+                        onLongPress: () =>
+                            _onSpaceChildContextMenu(null, rootSpace),
+                        trailing: const Icon(Icons.chevron_right_outlined),
+                      ),
+                    ],
                   ),
                 );
               },

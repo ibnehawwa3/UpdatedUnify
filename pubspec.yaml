@@ -37,6 +37,7 @@ dependencies:
   flutter_highlighter: ^0.1.1
   flutter_html: ^3.0.0-beta.2
   flutter_html_table: ^3.0.0-beta.2
+  flutter_inappwebview: ^5.7.2+3
   flutter_linkify: ^6.0.0
   flutter_local_notifications: ^15.1.0+1
   flutter_localizations:
@@ -63,6 +64,7 @@ dependencies:
   keyboard_shortcuts: ^0.1.4
   latlong2: ^0.8.1
   linkify: ^5.0.0
+  lottie: ^2.6.0
   matrix: ^0.22.0
   matrix_homeserver_recommendations: ^0.3.0
   native_imaging: ^0.1.0
@@ -105,6 +107,7 @@ dev_dependencies:
   msix: ^3.6.2
   translations_cleaner: ^0.0.5
   flutter_launcher_icons: "^0.13.1"
+  
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
@@ -124,6 +127,7 @@ flutter:
     - assets/sounds/
     - assets/js/
     - assets/js/package/
+    - assets/loading.json
 
   fonts:
     - family: Roboto

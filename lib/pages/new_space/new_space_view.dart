@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'new_space.dart';
 
+
 class NewSpaceView extends StatelessWidget {
   final NewSpaceController controller;
 

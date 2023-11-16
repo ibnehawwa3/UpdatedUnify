@@ -49,16 +49,16 @@ class ClientChooserButton extends StatelessWidget {
           ],
         ),
       ),
-      // PopupMenuItem(
-      //   value: SettingsAction.newSpace,
-      //   child: Row(
-      //     children: [
-      //       const Icon(Icons.workspaces_outlined),
-      //       const SizedBox(width: 18),
-      //       Text(L10n.of(context)!.createNewSpace),
-      //     ],
-      //   ),
-      // ),
+      PopupMenuItem(
+        value: SettingsAction.newSpace,
+        child: Row(
+          children: [
+            const Icon(Icons.workspaces_outlined),
+            const SizedBox(width: 18),
+            Text(L10n.of(context)!.createNewSpace),
+          ],
+        ),
+      ),
       PopupMenuItem(
         value: SettingsAction.invite,
         child: Row(
@@ -69,16 +69,16 @@ class ClientChooserButton extends StatelessWidget {
           ],
         ),
       ),
-      // PopupMenuItem(
-      //   value: SettingsAction.archive,
-      //   child: Row(
-      //     children: [
-      //       const Icon(Icons.archive_outlined),
-      //       const SizedBox(width: 18),
-      //       Text(L10n.of(context)!.archive),
-      //     ],
-      //   ),
-      // ),
+      PopupMenuItem(
+        value: SettingsAction.archive,
+        child: Row(
+          children: [
+            const Icon(Icons.archive_outlined),
+            const SizedBox(width: 18),
+            Text(L10n.of(context)!.archive),
+          ],
+        ),
+      ),
       PopupMenuItem(
         value: SettingsAction.settings,
         child: Row(

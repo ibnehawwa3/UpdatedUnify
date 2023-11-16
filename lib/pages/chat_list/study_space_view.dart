@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
+
+List<String> coursesNames = [];
 
 class StudyViewSpace extends StatefulWidget {
   const StudyViewSpace({Key? key}) : super(key: key);
@@ -15,6 +18,20 @@ class _StudyViewSpaceState extends State<StudyViewSpace> {
   List<dynamic> courses = [];
   InAppWebViewController? _webViewController;
   bool showPage = false;
+
+  void showCustomSnackbarLong(BuildContext context, String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 20,
+      backgroundColor: Colors.black,
+      textColor: Colors.white,
+      fontSize: 16.0,
+      webBgColor: "#000000",
+      webShowClose: true,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,79 +63,80 @@ class _StudyViewSpaceState extends State<StudyViewSpace> {
           ),
           body: courses.isNotEmpty
               ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 15.0),
-                      child: Text(
-                        "Your courses",
-                        style: TextStyle(fontSize: 20, color: Colors.black),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 25,
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: courses.length,
-                        itemBuilder: (context, index) {
-                          final data = courses[index];
-                          return ListTile(
-                            trailing: const Icon(CupertinoIcons.forward),
-                            leading: CircleAvatar(
-                              backgroundColor: const Color.fromARGB(
-                                255,
-                                71,
-                                24,
-                                201,
-                              ),
-                              child: Text(
-                                data['refId'],
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 8,
-                                ),
-                              ),
-                            ),
-                            title: Text(data['name']),
-                            onTap: () {
-                              print(data['url']);
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                )
-              : showPage
-                  ? InAppWebView(
-                      initialUrlRequest: URLRequest(
-                        url: Uri.tryParse(
-                          'https://login.hs-heilbronn.de/realms/hhn/protocol/openid-connect/auth?response_mode=form_post&response_type=id_token&redirect_uri=https%3A%2F%2Filias.hs-heilbronn.de%2Fopenidconnect.php&client_id=hhn_common_ilias&nonce=badc63032679bb541ff44ea53eeccb4e&state=2182e131aa3ed4442387157cd1823be0&scope=openid+openid',
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 15,
+              ),
+              const Padding(
+                padding: EdgeInsets.only(left: 15.0),
+                child: Text(
+                  "Your courses",
+                  style: TextStyle(fontSize: 20, color: Colors.black),
+                ),
+              ),
+              const SizedBox(
+                height: 25,
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: courses.length,
+                  itemBuilder: (context, index) {
+                    final data = courses[index];
+                    return ListTile(
+                      trailing: const Icon(CupertinoIcons.forward),
+                      leading: CircleAvatar(
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          71,
+                          24,
+                          201,
+                        ),
+                        child: Text(
+                          data['refId'],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                          ),
                         ),
                       ),
-                      onLoadStart: (controller, url) {
-                        setState(() {
-                          _webViewController = controller;
-                        });
-                      },
-                      onLoadStop: (controller, url) async {
-                        if (url.toString() ==
-                            "https://ilias.hs-heilbronn.de/ilias.php?baseClass=ilDashboardGUI&cmd=jumpToSelectedItems") {
-                          controller.loadUrl(
-                            urlRequest: URLRequest(
-                              url: Uri.parse(
-                                "https://ilias.hs-heilbronn.de/ilias.php?cmdClass=ilmembershipoverviewgui&cmdNode=jr&baseClass=ilmembershipoverviewgui",
-                              ),
-                            ),
-                          );
-
-                          Future.delayed(const Duration(seconds: 2), () async {
-                            final result = await controller.evaluateJavascript(
-                              source: '''
+                      title: Text(data['name']),
+                      onTap: () {},
+                    );
+                  },
+                ),
+              ),
+            ],
+          )
+              : showPage
+              ? InAppWebView(
+            initialUrlRequest: URLRequest(
+              url: Uri.tryParse(
+                'https://login.hs-heilbronn.de/realms/hhn/protocol/openid-connect/auth?response_mode=form_post&response_type=id_token&redirect_uri=https%3A%2F%2Filias.hs-heilbronn.de%2Fopenidconnect.php&client_id=hhn_common_ilias&nonce=badc63032679bb541ff44ea53eeccb4e&state=2182e131aa3ed4442387157cd1823be0&scope=openid+openid',
+              ),
+            ),
+            onLoadStart: (controller, url) {
+              showCustomSnackbarLong(
+                context,
+                "Please wait while fetch data from the server",
+              );
+              setState(() {
+                _webViewController = controller;
+              });
+            },
+            onLoadStop: (controller, url) async {
+              if (url.toString() ==
+                  "https://ilias.hs-heilbronn.de/ilias.php?baseClass=ilDashboardGUI&cmd=jumpToSelectedItems") {
+                controller.loadUrl(
+                  urlRequest: URLRequest(
+                    url: Uri.parse(
+                      "https://ilias.hs-heilbronn.de/ilias.php?cmdClass=ilmembershipoverviewgui&cmdNode=jr&baseClass=ilmembershipoverviewgui",
+                    ),
+                  ),
+                );
+                Future.delayed(const Duration(seconds: 2), () async {
+                  final result = await controller.evaluateJavascript(
+                    source: '''
                                const courseRows = document.querySelectorAll('.il-std-item');
                                const courses = [];
 
@@ -146,45 +164,41 @@ class _StudyViewSpaceState extends State<StudyViewSpace> {
 
                               courses;
                               ''',
-                            );
-
-                            setState(() {
-                              courses = result;
-                              showPage = !showPage;
-                            });
-                          });
-                        }
-                        //  else {
-                        // controller.loadUrl(
-                        //   urlRequest: URLRequest(
-                        //     url: Uri.parse(
-                        //       "https://ilias.hs-heilbronn.de/ilias.php?cmdClass=ilmembershipoverviewgui&cmdNode=jr&baseClass=ilmembershipoverviewgui",
-                        //     ),
-                        //   ),
-                        // );
-                        // }
-                      },
-                    )
-                  : Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Text("Courses not synchronized"),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              setState(() {
-                                showPage = !showPage;
-                              });
-                            },
-                            child: const Text("Synchronize"),
-                          ),
-                        ],
-                      ),
-                    ),
+                  );
+                  // intiliaze the global and scoped list with scrapped data
+                  setState(() {
+                    courses = result;
+                    showPage = !showPage;
+                  });
+                  for (final name in courses) {
+                    coursesNames.add(name['name']);
+                  }
+                  // move back to previous page with scrapped data.
+                  Navigator.of(context).pop(coursesNames);
+                });
+              }
+            },
+          )
+              : Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text("Courses not synchronized"),
+                const SizedBox(
+                  height: 20,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    setState(() {
+                      showPage = !showPage;
+                    });
+                  },
+                  child: const Text("Synchronize"),
+                ),
+              ],
+            ),
+          ),
         ),
         if (_isLoading)
           Container(
@@ -203,3 +217,5 @@ class _StudyViewSpaceState extends State<StudyViewSpace> {
     );
   }
 }
+
+

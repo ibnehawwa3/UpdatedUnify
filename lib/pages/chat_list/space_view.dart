@@ -1,18 +1,20 @@
-import 'package:fluffychat/pages/chat_list/study_space_view.dart';
-import 'package:flutter/material.dart';
-
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
-import 'package:go_router/go_router.dart';
-import 'package:matrix/matrix.dart';
-
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/search_title.dart';
+import 'package:fluffychat/pages/chat_list/study_space_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
+import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' as sdk;
+import 'package:matrix/matrix.dart';
+
 import '../../utils/localized_exception_extension.dart';
 import '../../widgets/matrix.dart';
 import 'chat_list_header.dart';
@@ -20,11 +22,12 @@ import 'chat_list_header.dart';
 class SpaceView extends StatefulWidget {
   final ChatListController controller;
   final ScrollController scrollController;
+
   const SpaceView(
-    this.controller, {
-    Key? key,
-    required this.scrollController,
-  }) : super(key: key);
+      this.controller, {
+        Key? key,
+        required this.scrollController,
+      }) : super(key: key);
 
   @override
   State<SpaceView> createState() => _SpaceViewState();
@@ -34,6 +37,24 @@ class _SpaceViewState extends State<SpaceView> {
   static final Map<String, Future<GetSpaceHierarchyResponse>> _requests = {};
 
   String? prevBatch;
+  bool publicGroup = false;
+  bool isLoading = false;
+
+  // Function to hit new spcae Api Ffor scrapped cources from the web
+  void submitAction(String data) async {
+    final matrix = Matrix.of(context);
+    matrix.client.createRoom(
+      preset: publicGroup
+          ? sdk.CreateRoomPreset.publicChat
+          : sdk.CreateRoomPreset.privateChat,
+      creationContent: {'type': RoomCreationTypes.mSpace},
+      visibility: publicGroup ? sdk.Visibility.public : null,
+      roomAliasName: publicGroup && data.isNotEmpty
+          ? data.trim().toLowerCase().replaceAll(' ', '_')
+          : null,
+      name: data.isNotEmpty ? data : null,
+    );
+  }
 
   void _refresh() {
     setState(() {
@@ -43,10 +64,10 @@ class _SpaceViewState extends State<SpaceView> {
 
   Future<GetSpaceHierarchyResponse> getFuture(String activeSpaceId) =>
       _requests[activeSpaceId] ??= Matrix.of(context).client.getSpaceHierarchy(
-            activeSpaceId,
-            maxDepth: 1,
-            from: prevBatch,
-          );
+        activeSpaceId,
+        maxDepth: 1,
+        from: prevBatch,
+      );
 
   void _onJoinSpaceChild(SpaceRoomsChunk spaceChild) async {
     final client = Matrix.of(context).client;
@@ -60,11 +81,10 @@ class _SpaceViewState extends State<SpaceView> {
             serverName: space?.spaceChildren
                 .firstWhereOrNull(
                   (child) => child.roomId == spaceChild.roomId,
-                )
+            )
                 ?.via,
           );
           if (client.getRoomById(spaceChild.roomId) == null) {
-            // Wait for room actually appears in sync
             await client.waitForRoomInSync(spaceChild.roomId, join: true);
           }
         },
@@ -90,7 +110,7 @@ class _SpaceViewState extends State<SpaceView> {
     final client = Matrix.of(context).client;
     final activeSpaceId = widget.controller.activeSpaceId;
     final activeSpace =
-        activeSpaceId == null ? null : client.getRoomById(activeSpaceId);
+    activeSpaceId == null ? null : client.getRoomById(activeSpaceId);
     final action = await showModalActionSheet<SpaceChildContextAction>(
       context: context,
       title: spaceChild?.name ??
@@ -151,71 +171,109 @@ class _SpaceViewState extends State<SpaceView> {
           .where(
             (space) => !allSpaces.any(
               (parentSpace) => parentSpace.spaceChildren
-                  .any((child) => child.roomId == space.id),
-            ),
-          )
+              .any((child) => child.roomId == space.id),
+        ),
+      )
           .toList();
 
-      return CustomScrollView(
-        controller: widget.scrollController,
-        slivers: [
-          ChatListHeader(controller: widget.controller),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, i) {
-                final rootSpace = rootSpaces[i];
-                final displayname = rootSpace.getLocalizedDisplayname(
-                  MatrixLocals(L10n.of(context)!),
-                );
-                return Material(
-                  color: Theme.of(context).colorScheme.background,
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: const Avatar(
-                          name: "SS",
-                        ),
-                        title: const Text(
-                          "Study",
-                        ),
-                        subtitle: const Text(
-                          "Study Space",
-                        ),
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const StudyViewSpace(),
+      return Stack(
+        children: [
+          CustomScrollView(
+            controller: widget.scrollController,
+            slivers: [
+              ChatListHeader(controller: widget.controller),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                      (context, i) {
+                    final rootSpace = rootSpaces[i];
+                    final displayname = rootSpace.getLocalizedDisplayname(
+                      MatrixLocals(L10n.of(context)!),
+                    );
+                    return Material(
+                      color: Theme.of(context).colorScheme.background,
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: Avatar(
+                              mxContent: rootSpace.avatar,
+                              name: displayname,
                             ),
-                          );
-                        },
-                        trailing: const Icon(Icons.chevron_right_outlined),
+                            title: Text(
+                              displayname,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: Text(
+                              L10n.of(context)!.numChats(
+                                rootSpace.spaceChildren.length.toString(),
+                              ),
+                            ),
+                            onTap: () =>
+                                widget.controller.setActiveSpace(rootSpace.id),
+                            onLongPress: () =>
+                                _onSpaceChildContextMenu(null, rootSpace),
+                            trailing: const Icon(Icons.chevron_right_outlined),
+                          ),
+                        ],
                       ),
-                      ListTile(
-                        leading: Avatar(
-                          mxContent: rootSpace.avatar,
-                          name: displayname,
-                        ),
-                        title: Text(
-                          displayname,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(
-                          L10n.of(context)!
-                              .numChats(rootSpace.spaceChildren.length.toString()),
-                        ),
-                        onTap: () => widget.controller.setActiveSpace(rootSpace.id),
-                        onLongPress: () =>
-                            _onSpaceChildContextMenu(null, rootSpace),
-                        trailing: const Icon(Icons.chevron_right_outlined),
-                      ),
-                    ],
+                    );
+                  },
+                  childCount: rootSpaces.length,
+                ),
+              ),
+            ],
+          ),
+          //Button To open space view syncronize course
+          Positioned(
+            top: 25,
+            right: 15,
+            child: FloatingActionButton(
+              child: const Icon(Icons.replay),
+              onPressed: () {
+                Navigator.of(context)
+                    .push(
+                  MaterialPageRoute(
+                    builder: (context) => const StudyViewSpace(),
                   ),
-                );
+                )
+                //This then method will be called when we poped from the above pushed Page(StudyViewSpace);
+                    .then((value) async {
+                  if (value != null) {
+                    // Start the loading
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    for (final data in value) {
+                      // Call api function to create new space after the wait of 2 seconds
+                      await Future.delayed(const Duration(seconds: 2), () {
+                        submitAction(data);
+                      });
+                    }
+                    // Stop the loading and empty the global list
+                    setState(() {
+                      isLoading = false;
+                      coursesNames = [];
+                    });
+                  }
+                });
               },
-              childCount: rootSpaces.length,
             ),
           ),
+          // Loading indicator while hitting api for cources
+          if (isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: Center(
+                child: SizedBox(
+                  height: 50,
+                  child: Lottie.asset(
+                    "assets/loading.json",
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
         ],
       );
     }
@@ -236,7 +294,7 @@ class _SpaceViewState extends State<SpaceView> {
               IconButton(
                 onPressed: _refresh,
                 icon: const Icon(Icons.refresh_outlined),
-              )
+              ),
             ],
           );
         }
@@ -253,7 +311,7 @@ class _SpaceViewState extends State<SpaceView> {
           );
         }
         final parentSpace = allSpaces.firstWhereOrNull(
-          (space) =>
+              (space) =>
               space.spaceChildren.any((child) => child.roomId == activeSpaceId),
         );
         final spaceChildren = response.rooms;
@@ -272,7 +330,7 @@ class _SpaceViewState extends State<SpaceView> {
               ChatListHeader(controller: widget.controller),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (context, i) {
+                      (context, i) {
                     if (i == 0) {
                       return ListTile(
                         leading: BackButton(
@@ -283,17 +341,17 @@ class _SpaceViewState extends State<SpaceView> {
                           parentSpace == null
                               ? L10n.of(context)!.allSpaces
                               : parentSpace.getLocalizedDisplayname(
-                                  MatrixLocals(L10n.of(context)!),
-                                ),
+                            MatrixLocals(L10n.of(context)!),
+                          ),
                         ),
                         trailing: IconButton(
                           icon: snapshot.connectionState != ConnectionState.done
                               ? const CircularProgressIndicator.adaptive()
                               : const Icon(Icons.refresh_outlined),
                           onPressed:
-                              snapshot.connectionState != ConnectionState.done
-                                  ? null
-                                  : _refresh,
+                          snapshot.connectionState != ConnectionState.done
+                              ? null
+                              : _refresh,
                         ),
                       );
                     }
@@ -361,7 +419,7 @@ class _SpaceViewState extends State<SpaceView> {
                                   L10n.of(context)!.chat,
                               maxLines: 1,
                               style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
+                              const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                           if (!isSpace) ...[
@@ -411,3 +469,5 @@ enum SpaceChildContextAction {
   leave,
   removeFromSpace,
 }
+
+

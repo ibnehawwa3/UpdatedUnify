@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -32,6 +33,8 @@ class _StudyViewSpaceState extends State<StudyViewSpace> {
       webShowClose: true,
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +174,7 @@ class _StudyViewSpaceState extends State<StudyViewSpace> {
                     showPage = !showPage;
                   });
                   for (final name in courses) {
-                    coursesNames.add(name['name']);
+                    coursesNames.isNotEmpty ? coursesNames.add(name['name']) : [];
                   }
                   // move back to previous page with scrapped data.
                   Navigator.of(context).pop(coursesNames);
